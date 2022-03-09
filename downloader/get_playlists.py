@@ -10,6 +10,8 @@ from requests import Session
 
 from pytube import Channel
 
+from .helpers import TextColors
+
 
 API_KEY = os.environ.get("YOUTUBE_API_TOKEN")
 assert API_KEY
@@ -17,21 +19,11 @@ assert API_KEY
 MAX_RESULTS_PER_PAGE = 50
 PLAYLISTS_URL = "https://www.googleapis.com/youtube/v3/playlists"
 
-class TextColors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
 
 def get_plists(input_stream, output_stream):
     def _configure_ssl():
         import ssl
+
         ssl._create_default_https_context = ssl._create_unverified_context
 
     _configure_ssl()
@@ -76,30 +68,50 @@ def get_plists(input_stream, output_stream):
                 batch_items = data.get("items", [])
                 plists[channel_name].extend(
                     list(
-                        map(lambda item: {"id": item["id"], "title": item["snippet"]["title"]}, batch_items),
+                        map(
+                            lambda item: {
+                                "id": item["id"],
+                                "title": item["snippet"]["title"],
+                            },
+                            batch_items,
+                        ),
                     )
                 )
-                print(f"{TextColors.OKCYAN}[{channel_name}] Debug: loaded {len(batch_items)} playlists, next page is {next_page_token} {TextColors.ENDC}")
+                print(
+                    f"{TextColors.OKCYAN}[{channel_name}] Debug: loaded {len(batch_items)} playlists, next page is {next_page_token} {TextColors.ENDC}"
+                )
 
                 has_next_page = bool(next_page_token)
 
                 time.sleep(0.1)
-            print(f"{TextColors.OKGREEN}[{channel_name}] Found {len(plists[channel_name])} playlists {TextColors.ENDC}")
+            print(
+                f"{TextColors.OKGREEN}[{channel_name}] Found {len(plists[channel_name])} playlists {TextColors.ENDC}"
+            )
         except Exception as exc:
-            print(f"{TextColors.FAIL}Error on getting playlists: {exc}{TextColors.ENDC}")
+            print(
+                f"{TextColors.FAIL}Error on getting playlists: {exc}{TextColors.ENDC}"
+            )
 
     output_stream.write(json.dumps(plists))
 
 
-parser = argparse.ArgumentParser(description='Process cmdline arguments')
+parser = argparse.ArgumentParser(description="Process cmdline arguments")
 
-parser.add_argument('--input', dest='input',
-                    type=argparse.FileType("r"), default=sys.stdin,
-                    help='input stream (default stdin)')
+parser.add_argument(
+    "--input",
+    dest="input",
+    type=argparse.FileType("r"),
+    default=sys.stdin,
+    help="input stream (default stdin)",
+)
 
-parser.add_argument('--output', dest='output',
-                    type=argparse.FileType("w"), default=sys.stdout,
-                    help='output stream (default stdout)')
+parser.add_argument(
+    "--output",
+    dest="output",
+    type=argparse.FileType("w"),
+    default=sys.stdout,
+    help="output stream (default stdout)",
+)
 
 args = parser.parse_args()
 
