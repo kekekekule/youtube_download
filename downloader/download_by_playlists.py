@@ -19,7 +19,7 @@ PLAYLIST_URL_FORMAT = "https://www.youtube.com/playlist?list={}"
 
 
 def on_progress(stream, chunk, bytes_remaining):
-    print(f"{TextColors.BOLD}\t>>> Remaining {bytes_remaining} bytes...{TextColors.ENDC}")
+    print(f"{TextColors.BOLD}\t\t>>> Remaining {bytes_remaining} bytes{TextColors.ENDC}")
 
 
 def download(filestream):
@@ -62,6 +62,7 @@ def download(filestream):
             count_downloaded = 0
             count_in_playlist = len(playlist.video_urls)
             for video in playlist.videos:
+                print(f"\tDownloading {video.watch_url}")
                 tries = 0
                 while tries < 3:
                     try:
@@ -76,7 +77,7 @@ def download(filestream):
 
                         _perform_dl(video_stream, path_for_saved)
                         break
-                    except (IncompleteRead, URLError):
+                    except (IncompleteRead, URLError, ConnectionResetError, Exception):
                         print(f"{TextColors.FAIL}Failed. Retrying...{TextColors.ENDC}\r")
                         tries += 1
                 else:

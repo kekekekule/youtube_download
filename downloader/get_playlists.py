@@ -10,7 +10,7 @@ from requests import Session
 
 from pytube import Channel
 
-from .helpers import TextColors
+from helpers import TextColors
 
 
 API_KEY = os.environ.get("YOUTUBE_API_TOKEN")
